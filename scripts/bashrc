@@ -1,0 +1,169 @@
+# Shell Init
+# Stefano Vazzoler (stefanovazzoler.com)
+
+##
+# Set Colors
+# from www.tldp.org
+##
+
+# Normal Colors
+Black='\e[0;30m'        # Black
+Red='\e[0;31m'          # Red
+Green='\e[0;32m'        # Green
+Yellow='\e[0;33m'       # Yellow
+Blue='\e[0;34m'         # Blue
+Purple='\e[0;35m'       # Purple
+Cyan='\e[0;36m'         # Cyan
+White='\e[0;37m'        # White
+
+# Bold
+BLD_Black='\e[1;30m'       # Black
+BLD_Red='\e[1;31m'         # Red
+BLD_Green='\e[1;32m'       # Green
+BLD_Yellow='\e[1;33m'      # Yellow
+BLD_Blue='\e[1;34m'        # Blue
+BLD_Purple='\e[1;35m'      # Purple
+BLD_Cyan='\e[1;36m'        # Cyan
+BLD_White='\e[1;37m'       # White
+
+# Background
+BG_Black='\e[40m'       # Black
+BG_Red='\e[41m'         # Red
+BG_Green='\e[42m'       # Green
+BG_Yellow='\e[43m'      # Yellow
+BG_Blue='\e[44m'        # Blue
+BG_Purple='\e[45m'      # Purple
+BG_Cyan='\e[46m'        # Cyan
+BG_White='\e[47m'       # White
+
+NC="\e[m"                   # Reset
+
+##
+# Print System info
+# 
+##
+
+echo -e ${BLD_Green}${BG_Black}
+printf 'Uptime:'
+uptime
+printf 'Disk usage: '
+df --output=pcent /dev/vda1 | tr -dc '0-9'
+echo -e ${NC}
+echo ""
+
+##
+# Set Aliases
+# 
+##
+
+# Users and connection
+alias authlog="sudo less /var/log/auth.log"
+alias lastlogin="lastlog | grep -v '**Never logged in**'"
+alias connections="last"
+alias connected="last | grep 'still logged in'"
+alias unconnected="last | grep -v 'still logged in'"
+
+# Check banned ips
+alias banned="sudo zgrep 'Ban:' /var/log/fail2ban.log*"
+alias bannedstats="sudo fail2ban-client status sshd"
+
+##
+# Functions
+# 
+##
+
+logFn () {
+    echo ""
+    printf ${Yellow}${BG_Black}
+    echo "Banned ips"
+    printf ${NC}
+    echo ""
+    banned
+    echo ""
+
+    printf ${Yellow}${BG_Black}
+    echo "Currently connected users"
+    printf ${NC}
+    echo ""
+    connected
+    echo ""
+
+    printf ${Yellow}${BG_Black}
+    echo "Last login"
+    printf ${NC}
+    echo ""
+    lastlogin
+    echo ""
+}
+
+# Alias for Log
+alias log="logFn"
+alias security="logFn"
+
+updateFn () {
+    # Intro Screen
+    printf ${BLD_Cyan}${BG_Black}
+    echo "#################################"
+    echo "#   up.sh by Stefano Vazzoler   #"
+    echo "#################################"
+    printf ${NC}
+
+    # Update
+    sudo apt -y update
+    echo "#################################"
+
+    # Upgrade
+    sudo apt -y upgrade
+    echo "#################################"
+
+    # Upgrade 2 (http://manpages.ubuntu.com/manpages/bionic/man8/apt.8.html)
+    sudo apt -y full-upgrade
+    echo "#################################"
+
+    # Removed packages that are no longer required
+    sudo apt -y autoremove
+    echo "#################################"
+
+    # Clean the apt cache
+    sudo apt -y autoclean
+    echo "#################################"
+}
+
+# Alias for Update
+alias up="updateFn"
+alias update="updateFn"
+
+helpFn() {
+    printf ${BLD_Cyan}${BG_Black}
+    echo "############"
+    echo "#   HELP   #"
+    echo "############"
+    echo -e ${NC}
+
+    echo "authlog - Get the authentication log"
+    echo "lastlogin - List last connection for every user"
+    echo ""
+
+    echo "connections - Shows last connections"
+    echo "connected - Show open connections"
+    echo "unconnected - Show last closed connections"
+    echo ""
+
+    echo "banned - Shows a list of banned ips"
+    echo "bannedstats - Shows a list of banned ips (for sshd)"
+    echo ""
+
+    echo "up/update/updateFn - Run a system update"
+    echo ""
+
+    echo "log/security/logFn - Runs a quick report"
+    echo ""
+
+    echo "help/helpFn - Shows this help"
+
+    echo -e ${BLD_Cyan}${BG_Black}
+    echo "############"
+    printf ${NC}
+}
+
+alias help="helpFn"
